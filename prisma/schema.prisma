@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  location  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Plantings Planting[]
+}
+
+model Plant {
+  id             Int      @id @default(autoincrement())
+  name           String
+  type           String
+  growingPeriod  Int
+  tempMin        Float
+  tempMax        Float
+  humidityMin    Float
+  humidityMax    Float
+  rainResistance String
+  idealSeason    String
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  Plantings      Planting[]
+}
+
+model Planting {
+  id                 Int      @id @default(autoincrement())
+  userId             Int
+  plantId            Int
+  plantingDate       DateTime
+  expectedHarvestDate DateTime
+  actualHarvestDate  DateTime?
+  status             String
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  User               User     @relation(fields: [userId], references: [id])
+  Plant              Plant    @relation(fields: [plantId], references: [id])
+  Logs               PlantingLog[]
+}
+
+model PlantingLog {
+  id         Int      @id @default(autoincrement())
+  plantingId Int
+  logType    String
+  date       DateTime
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  Planting   Planting @relation(fields: [plantingId], references: [id])
+}
+
+model WeatherData {
+  id         Int      @id @default(autoincrement())
+  location   String
+  date       DateTime
+  tempMin    Float
+  tempMax    Float
+  tempAvg    Float
+  humidity   Float
+  rainfall   Float
+  windSpeed  Float
+  conditions String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
