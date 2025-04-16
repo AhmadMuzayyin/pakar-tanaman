@@ -41,7 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
 
         // Return user tanpa password
-        const { password: _, ...userWithoutPassword } = newUser;
+        const { password: passwordField, ...userWithoutPassword } = newUser;
 
         return res.status(201).json({
             message: "Registrasi berhasil",

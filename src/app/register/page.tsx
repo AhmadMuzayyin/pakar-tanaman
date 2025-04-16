@@ -54,9 +54,9 @@ export default function RegisterPage() {
 
             // Redirect ke halaman login setelah registrasi berhasil
             router.push("/login?registered=true");
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Registrasi error:", error);
-            if (error.response?.data?.message) {
+            if (axios.isAxiosError(error) && error.response?.data?.message) {
                 setError(error.response.data.message);
             } else {
                 setError("Terjadi kesalahan saat registrasi. Silakan coba lagi.");

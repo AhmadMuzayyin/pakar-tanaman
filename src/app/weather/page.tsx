@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import Image from "next/image";
 
 type WeatherData = {
     name: string;
@@ -228,10 +229,12 @@ export default function WeatherPage() {
                             </div>
                             <div className="mt-4 md:mt-0 flex items-center">
                                 {weather.weather && weather.weather[0] && (
-                                    <img
+                                    <Image
                                         src={getWeatherIconUrl(weather.weather[0].icon)}
                                         alt={weather.weather[0].description}
                                         className="w-16 h-16"
+                                        width={64}
+                                        height={64}
                                     />
                                 )}
                                 <div className="ml-2">
