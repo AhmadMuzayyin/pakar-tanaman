@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,18 +8,18 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   name      String
-  email     String   @unique
+  email     String     @unique
   password  String
   location  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   Plantings Planting[]
 }
 
 model Plant {
-  id             Int      @id @default(autoincrement())
+  id             Int        @id @default(autoincrement())
   name           String
   type           String
   growingPeriod  Int
@@ -36,25 +30,25 @@ model Plant {
   rainResistance String
   idealSeason    String
   notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
   Plantings      Planting[]
 }
 
 model Planting {
-  id                 Int      @id @default(autoincrement())
-  userId             Int
-  plantId            Int
-  plantingDate       DateTime
+  id                  Int           @id @default(autoincrement())
+  userId              Int
+  plantId             Int
+  plantingDate        DateTime
   expectedHarvestDate DateTime
-  actualHarvestDate  DateTime?
-  status             String
-  notes              String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  User               User     @relation(fields: [userId], references: [id])
-  Plant              Plant    @relation(fields: [plantId], references: [id])
-  Logs               PlantingLog[]
+  actualHarvestDate   DateTime?
+  status              String
+  notes               String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  Plant               Plant         @relation(fields: [plantId], references: [id])
+  User                User          @relation(fields: [userId], references: [id])
+  Logs                PlantingLog[]
 }
 
 model PlantingLog {
