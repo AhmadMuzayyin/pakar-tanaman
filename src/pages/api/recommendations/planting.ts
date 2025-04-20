@@ -73,6 +73,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json(recommendations);
     } catch (error) {
         console.error("Recommendation API error:", error);
-        return res.status(500).json({ error: "Failed to fetch recommendations", message: error.message });
+        // Fix TypeScript error by checking error type
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        return res.status(500).json({ error: "Failed to fetch recommendations", message: errorMessage });
     }
 }
