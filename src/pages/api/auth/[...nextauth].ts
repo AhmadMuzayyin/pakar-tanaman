@@ -1,10 +1,8 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
 import NextAuth, { AuthOptions } from "next-auth";
 import { compare } from "bcrypt";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prismaClient";
 
 // Define the auth options separately for better type checking
 export const authOptions: AuthOptions = {
@@ -64,9 +62,8 @@ export const authOptions: AuthOptions = {
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                // Make sure we properly cast the user to the expected type
                 token.user = {
-                    id: user.id.toString(),
+                    id: user.id,
                     name: user.name || '',
                     email: user.email || '',
                     location: user.location || undefined
@@ -75,17 +72,7 @@ export const authOptions: AuthOptions = {
             return token;
         },
         async session({ session, token }) {
-            // Initialize session.user with the minimum required properties
-            if (!session.user) {
-                session.user = {
-                    id: '',
-                    name: null,
-                    email: null
-                };
-            }
-
-            // Add user data from token to session
-            if (token.user) {
+            if (token.user && session.user) {
                 session.user.id = token.user.id;
                 session.user.name = token.user.name;
                 session.user.email = token.user.email;
@@ -95,7 +82,7 @@ export const authOptions: AuthOptions = {
         },
     },
     debug: process.env.NODE_ENV === 'development',
-    secret: process.env.NEXTAUTH_SECRET || 'your-fallback-secret-dont-use-this-in-production',
+    secret: process.env.NEXTAUTH_SECRET,
 };
 
 export default NextAuth(authOptions);

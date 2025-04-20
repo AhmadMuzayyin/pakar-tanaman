@@ -1,9 +1,7 @@
-"use client";
-
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
-import NavigationBar from "@/components/NavigationBar";
+import ClientProviders from "@/components/ClientProviders";
+import type { Metadata, Viewport } from "next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +13,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Removed the metadata export as it is not allowed in a Client Component.
-// If needed, move the metadata to a separate server-side file.
+// Konfigurasi metadata untuk SEO
+export const metadata: Metadata = {
+  title: {
+    default: "TaniPintar - Aplikasi Pakar Tanaman",
+    template: "%s | TaniPintar",
+  },
+  description: "Aplikasi untuk membantu petani dalam merawat tanaman dan mendapatkan rekomendasi terbaik",
+  keywords: ["tanaman", "pertanian", "kebun", "tanipintar", "pakar tanaman", "rekomendasi tanaman"],
+  authors: [{ name: "TaniPintar Team" }],
+  creator: "TaniPintar",
+};
+
+// Konfigurasi viewport
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
+};
 
 export default function RootLayout({
   children,
@@ -28,10 +46,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
-        <SessionProvider>
-          <NavigationBar />
-          <main>{children}</main>
-        </SessionProvider>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );
