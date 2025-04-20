@@ -64,26 +64,32 @@ export const authOptions: AuthOptions = {
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                token.user = user;
+                // Make sure we properly cast the user to the expected type
+                token.user = {
+                    id: user.id.toString(),
+                    name: user.name || '',
+                    email: user.email || '',
+                    location: user.location || undefined
+                };
             }
             return token;
         },
-        async session({ session, token }: {
-            session: { user?: Record<string, unknown> };
-            token: { user?: { id: string; name: string; email: string; location?: string } }
-        }) {
-            // Ensure session.user exists
-            if (!session.user) session.user = {};
+        async session({ session, token }) {
+            // Initialize session.user with the minimum required properties
+            if (!session.user) {
+                session.user = {
+                    id: '',
+                    name: null,
+                    email: null
+                };
+            }
 
             // Add user data from token to session
             if (token.user) {
-                session.user = {
-                    ...session.user,
-                    id: token.user.id,
-                    name: token.user.name,
-                    email: token.user.email,
-                    location: token.user.location
-                };
+                session.user.id = token.user.id;
+                session.user.name = token.user.name;
+                session.user.email = token.user.email;
+                session.user.location = token.user.location;
             }
             return session;
         },

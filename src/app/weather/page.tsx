@@ -39,8 +39,8 @@ export default function WeatherPage() {
     const [detectedLocation, setDetectedLocation] = useState<string | null>(null);
     const [isLocating, setIsLocating] = useState(false);
 
-    // Function to get user's location
-    const getUserLocation = () => {
+    // Function to get user's location - wrapped in useCallback to prevent recreation on every render
+    const getUserLocation = useCallback(() => {
         if ("geolocation" in navigator) {
             setIsLocating(true);
             setDetectedLocation("Mendeteksi lokasi Anda...");
@@ -69,7 +69,7 @@ export default function WeatherPage() {
             setDetectedLocation("Geolokasi tidak didukung di browser Anda");
             setError("Geolokasi tidak didukung di browser Anda. Silakan gunakan browser lain yang mendukung geolokasi.");
         }
-    };
+    }, []);
 
     // Detect user's location on component mount
     useEffect(() => {
