@@ -1,11 +1,26 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from '@/lib/supabase';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../auth/[...nextauth]';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    // Get the user session
+    const session = await getServerSession(req, res, authOptions);
+
     if (req.method === "GET") {
-        const { data: plants, error } = await supabase
-            .from('Plant')
-            .select('*');
+        // If user is logged in, get public plants + user's own plants
+        // If not logged in, only get public plants
+        let query = supabase.from('Plant').select('*');
+
+        if (session?.user?.id) {
+            // Get public plants OR plants created by this user
+            query = query.or(`isPublic.eq.true,userId.eq.${session.user.id}`);
+        } else {
+            // Only get public plants
+            query = query.eq('isPublic', true);
+        }
+
+        const { data: plants, error } = await query;
 
         if (error) {
             return res.status(500).json({ error: error.message });
@@ -15,7 +30,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === "POST") {
-        const { name, type, growingPeriod, tempMin, tempMax, humidityMin, humidityMax, rainResistance, idealSeason, notes } = req.body;
+        // Check if user is authenticated
+        if (!session?.user?.id) {
+            return res.status(401).json({ error: "Anda harus login untuk menambahkan tanaman" });
+        }
+
+        const { name, type, growingPeriod, tempMin, tempMax, humidityMin, humidityMax, rainResistance, idealSeason, notes, isPublic = false } = req.body;
 
         const { data: newPlant, error } = await supabase
             .from('Plant')
@@ -30,6 +50,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 rainResistance,
                 idealSeason,
                 notes,
+                userId: parseInt(session.user.id), // Add the user ID
+                isPublic, // Set visibility (default to false - only visible to the user)
                 createdAt: new Date(),
                 updatedAt: new Date()
             }])

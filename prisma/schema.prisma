@@ -16,6 +16,7 @@ model User {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   Plantings Planting[]
+  Plants    Plant[]    // Add relation to Plants
 }
 
 model Plant {
@@ -33,6 +34,9 @@ model Plant {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   Plantings      Planting[]
+  userId         Int?       // Make it optional to allow plants without a user (public plants)
+  User           User?      @relation(fields: [userId], references: [id])
+  isPublic       Boolean    @default(true) // New field to determine if plant is public
 }
 
 model Planting {

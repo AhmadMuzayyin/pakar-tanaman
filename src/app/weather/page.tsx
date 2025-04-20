@@ -37,10 +37,12 @@ export default function WeatherPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [detectedLocation, setDetectedLocation] = useState<string | null>(null);
+    const [isLocating, setIsLocating] = useState(false);
 
-    // Detect user's location on component mount
-    useEffect(() => {
+    // Function to get user's location
+    const getUserLocation = () => {
         if ("geolocation" in navigator) {
+            setIsLocating(true);
             setDetectedLocation("Mendeteksi lokasi Anda...");
 
             navigator.geolocation.getCurrentPosition(
@@ -54,15 +56,24 @@ export default function WeatherPage() {
 
                     // Get location name using reverse geocoding
                     fetchLocationName(latitude, longitude);
+                    setIsLocating(false);
                 },
                 (err) => {
                     console.error("Error getting location:", err);
                     setDetectedLocation("Gagal mendeteksi lokasi");
+                    setError("Tidak dapat mendeteksi lokasi Anda. Silakan izinkan akses lokasi di browser Anda.");
+                    setIsLocating(false);
                 }
             );
         } else {
             setDetectedLocation("Geolokasi tidak didukung di browser Anda");
+            setError("Geolokasi tidak didukung di browser Anda. Silakan gunakan browser lain yang mendukung geolokasi.");
         }
+    };
+
+    // Detect user's location on component mount
+    useEffect(() => {
+        getUserLocation();
     }, []);
 
     const fetchLocationName = async (lat: number, lon: number) => {
@@ -87,7 +98,7 @@ export default function WeatherPage() {
 
     const fetchWeather = useCallback(async () => {
         if (!location.lat || !location.lon) {
-            setError("Latitude dan longitude diperlukan");
+            setError("Lokasi belum terdeteksi");
             return;
         }
 
@@ -142,48 +153,45 @@ export default function WeatherPage() {
             <h1 className="text-3xl font-bold mb-6">Informasi Cuaca</h1>
 
             <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                <h2 className="text-xl font-semibold mb-4">Masukkan Lokasi Anda</h2>
+                <h2 className="text-xl font-semibold mb-4">Lokasi Anda</h2>
 
-                {detectedLocation && (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                        <p className="text-blue-700 text-sm flex items-center">
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            {detectedLocation}
-                        </p>
-                    </div>
-                )}
+                <div className="mb-6">
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                                <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <p className="text-blue-700">
+                                    {isLocating ? "Mendeteksi lokasi Anda..." : detectedLocation || "Lokasi belum terdeteksi"}
+                                </p>
+                            </div>
+                            <button
+                                onClick={getUserLocation}
+                                disabled={isLocating}
+                                className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                            >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Perbarui Lokasi
+                            </button>
+                        </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
-                        <input
-                            type="text"
-                            value={location.lat}
-                            onChange={(e) => setLocation({ ...location, lat: e.target.value })}
-                            className="border rounded-md p-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            placeholder="Contoh: -6.200000"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
-                        <input
-                            type="text"
-                            value={location.lon}
-                            onChange={(e) => setLocation({ ...location, lon: e.target.value })}
-                            className="border rounded-md p-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            placeholder="Contoh: 106.816666"
-                        />
+                        {location.lat && location.lon && (
+                            <div className="mt-2 text-xs text-blue-600 flex justify-between">
+                                <span>Koordinat: {location.lat}, {location.lon}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <button
                     onClick={fetchWeather}
-                    disabled={loading}
-                    className={`${loading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
-                        } text-white px-6 py-2 rounded-lg transition-colors flex items-center justify-center`}
+                    disabled={loading || !location.lat || !location.lon}
+                    className={`${loading || !location.lat || !location.lon ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
+                        } text-white px-6 py-2 rounded-lg transition-colors flex items-center justify-center w-full`}
                 >
                     {loading ? (
                         <>
