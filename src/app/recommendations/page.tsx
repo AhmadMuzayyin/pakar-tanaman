@@ -51,7 +51,7 @@ export default function RecommendationsPage() {
     // Detect user's location on component mount
     useEffect(() => {
         getUserLocation();
-    }, []);
+    }, [getUserLocation]);
 
     const fetchLocationName = async (lat: number, lon: number) => {
         try {

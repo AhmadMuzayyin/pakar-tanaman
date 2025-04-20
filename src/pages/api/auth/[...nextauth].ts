@@ -68,7 +68,10 @@ export const authOptions: AuthOptions = {
             }
             return token;
         },
-        async session({ session, token }: { session: any; token: any }) {
+        async session({ session, token }: {
+            session: { user?: Record<string, unknown> };
+            token: { user?: { id: string; name: string; email: string; location?: string } }
+        }) {
             // Ensure session.user exists
             if (!session.user) session.user = {};
 

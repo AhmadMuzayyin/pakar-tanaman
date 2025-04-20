@@ -123,9 +123,10 @@ export default function PlantsPage() {
       setIsFormVisible(false);
       setIsEditMode(false);
       setCurrentPlantId(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving plant:", error);
-      setError(error.response?.data?.error || "Gagal menyimpan data tanaman");
+      const errorResponse = error as { response?: { data?: { error?: string } } };
+      setError(errorResponse.response?.data?.error || "Gagal menyimpan data tanaman");
     } finally {
       setActionLoading(false);
     }
@@ -165,9 +166,10 @@ export default function PlantsPage() {
       setPlants(plants.filter(plant => plant.id !== plantToDelete));
       setIsDeleteModalOpen(false);
       setPlantToDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting plant:", error);
-      setError(error.response?.data?.error || "Gagal menghapus tanaman");
+      const errorResponse = error as { response?: { data?: { error?: string } } };
+      setError(errorResponse.response?.data?.error || "Gagal menghapus tanaman");
     } finally {
       setActionLoading(false);
     }
